@@ -54,10 +54,9 @@
         <version>${javafx.plugin.version}</version>
         <configuration>
           <!-- run 'mvn javafx:jlink' to create launcher.
-            Exec ./target/myapp/bin/myapp to launch the app.
+            Exec ./target/your-project-name/bin/your-project-name to launch the app.
             -->
           <stripDebug>true</stripDebug>
-          <compress>2</compress>
           <noHeaderFiles>true</noHeaderFiles>
           <noManPages>true</noManPages>
           <mainClass>${main.class}</mainClass>
