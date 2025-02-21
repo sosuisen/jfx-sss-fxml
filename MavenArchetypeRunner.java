@@ -8,6 +8,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.io.IOException;
 import java.util.stream.Stream;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 public class MavenArchetypeRunner {
     public static void main(String[] args) {
@@ -81,10 +83,16 @@ public class MavenArchetypeRunner {
             // アーキタイプ名の末尾に -archetype と付くのを削除
             File archetypePomFile = new File(projectDir,
                     "target/generated-sources/archetype/pom.xml");
+            String artifactId = null;
             if (archetypePomFile.exists()) {
                 String content = Files.readString(archetypePomFile.toPath());
-                content = content.replaceAll("<artifactId>([^<]+)-archetype</artifactId>",
-                        "<artifactId>$1</artifactId>");
+                Pattern pattern = Pattern.compile("<artifactId>([^<]+)-archetype</artifactId>");
+                Matcher matcher = pattern.matcher(content);
+                if (matcher.find()) {
+                    artifactId = matcher.group(1);
+                    content = content.replaceAll("<artifactId>([^<]+)-archetype</artifactId>",
+                            "<artifactId>" + artifactId + "</artifactId>");
+                }
                 content = content.replaceAll("<name>([^<]+)-archetype</name>",
                         "<name>$1</name>");
                 Files.writeString(archetypePomFile.toPath(), content);
@@ -97,6 +105,10 @@ public class MavenArchetypeRunner {
                     "target/generated-sources/archetype/src/main/resources/archetype-resources/pom.xml");
             if (pomFile.exists()) {
                 String content = Files.readString(pomFile.toPath());
+                if (artifactId != null) {
+                    content = content.replaceAll("<description>.+</description>",
+                            "<description>Generated from " + artifactId + " archetype</description>");
+                }
                 content = content.replaceAll("<javafx\\.version>.+</javafx\\.version>",
                         "<javafx.version>\\${javaFxVersion}</javafx.version>");
                 content = content.replaceAll("<maven\\.compiler\\.release>.+</maven\\.compiler\\.release>",
@@ -127,6 +139,9 @@ public class MavenArchetypeRunner {
                 content = content.replaceAll(
                         "(<fileSet encoding=\"UTF-8\">\\s*<directory>src/main/resources</directory>)",
                         "<fileSet filtered=\"true\" packaged=\"true\" encoding=\"UTF-8\"><directory>src/main/resources</directory>");
+                content = content.replaceAll(
+                        "(<fileSet encoding=\"UTF-8\">\\s*<directory>.vscode</directory>)",
+                        "<fileSet filtered=\"true\" encoding=\"UTF-8\"><directory>.vscode</directory>");
                 Files.writeString(archetypeMetadataFile.toPath(), content);
                 System.out.println("Replaced archetype-metadata.xml");
             }
