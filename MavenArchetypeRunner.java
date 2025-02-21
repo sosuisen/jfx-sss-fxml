@@ -12,6 +12,80 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 public class MavenArchetypeRunner {
+    static final String GITHUB_ACCOUNT = "sosuisen";
+    static final String LICENSES = """
+            <licenses>
+              <license>
+                <name>The Apache License, Version 2.0</name>
+                <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+              </license>
+            </licenses>""";
+    static final String DEVELOPERS = """
+            <developers>
+               <developer>
+                  <name>Hidekazu Kubota</name>
+                  <email>hidekazu.kubota@gmail.com</email>
+                  <organization>Sosuisha</organization>
+                  <organizationUrl>https://sosuisha.com</organizationUrl>
+               </developer>
+            </developers>""";
+    static final String PUBLISH_PLUGIN = """
+            <plugins>
+                <plugin>
+                    <groupId>org.sonatype.central</groupId>
+                    <artifactId>central-publishing-maven-plugin</artifactId>
+                    <version>0.7.0</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <publishingServerId>central</publishingServerId>
+                        <tokenAuth>true</tokenAuth>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>3.3.0</version>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <phase>package</phase>
+                            <goals><goal>jar</goal></goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                 <version>3.3.0</version>
+                 <configuration>
+                        <additionalOptions>
+                         <!-- skip strict check java doc-->
+                            <additionalOption>-Xdoclint:none</additionalOption>
+                        </additionalOptions>
+                    </configuration>
+                 <executions>
+                  <execution>
+                      <id>attach-javadocs</id>
+                      <phase>package</phase>
+                      <goals><goal>jar</goal></goals>
+                  </execution>
+                 </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-gpg-plugin</artifactId>
+                 <version>1.6</version>
+                 <executions>
+                     <execution>
+                      <id>sign-artifacts</id>
+                   <phase>verify</phase>
+                   <goals>
+                    <goal>sign</goal>
+                   </goals>
+                  </execution>
+                 </executions>
+                </plugin>
+            </plugins>
+                """;
+
     public static void main(String[] args) {
         // カレントディレクトリの "project" フォルダを対象にする
         File projectDir = new File(System.getProperty("user.dir"), "project");
@@ -78,7 +152,7 @@ public class MavenArchetypeRunner {
             int exitCode = process.waitFor();
             System.out.println(command.toString() + " has been done. Exit code: " + exitCode);
 
-            // 生成結果を修正
+            // アーキタイププロジェクトの生成結果を修正
             // project/target/generated-sources/archetype/pom.xml
             // アーキタイプ名の末尾に -archetype と付くのを削除
             File archetypePomFile = new File(projectDir,
@@ -95,6 +169,15 @@ public class MavenArchetypeRunner {
                 }
                 content = content.replaceAll("<name>([^<]+)-archetype</name>",
                         "<name>$1</name>");
+                // (?s) means DOTALL mode
+                content = content.replaceAll("(?s)<licenses>.+?</licenses>", LICENSES);
+                content = content.replaceAll("(?s)<developers>.+?</developers>", DEVELOPERS);
+                content = content.replaceAll("<scm />",
+                        "<scm>\n<connection>scm:git:git://github.com/" + GITHUB_ACCOUNT + "/" + artifactId
+                                + ".git</connection>\n<developerConnection>scm:git:ssh://github.com:" + GITHUB_ACCOUNT
+                                + "/" + artifactId + ".git</developerConnection>\n<url>https://github.com/"
+                                + GITHUB_ACCOUNT + "/" + artifactId + "/tree/main</url>\n</scm>");
+                content = content.replaceAll("</pluginManagement>", "</pluginManagement>\n" + PUBLISH_PLUGIN);
                 Files.writeString(archetypePomFile.toPath(), content);
                 System.out.println("Replaced archetype pom.xml");
             }
@@ -115,8 +198,6 @@ public class MavenArchetypeRunner {
                         "<maven.compiler.release>\\${javaVersion}</maven.compiler.release>");
                 content = content.replaceAll("<main\\.class>.+\\.App</main\\.class>",
                         "<main.class>\\${package}.App</main.class>");
-                // (?s) is DOTALL mode
-                content = content.replaceAll("(?s)<plugin>\\s*<groupId>org.sonatype.central</groupId>.+?</plugin>", "");
 
                 Files.writeString(pomFile.toPath(), content);
                 System.out.println("Replaced pom.xml");
