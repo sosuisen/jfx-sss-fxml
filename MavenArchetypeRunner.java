@@ -115,6 +115,9 @@ public class MavenArchetypeRunner {
                         "<maven.compiler.release>\\${javaVersion}</maven.compiler.release>");
                 content = content.replaceAll("<main\\.class>.+\\.App</main\\.class>",
                         "<main.class>\\${package}.App</main.class>");
+                // (?s) is DOTALL mode
+                content = content.replaceAll("(?s)<plugin>\\s*<groupId>org.sonatype.central</groupId>.+?</plugin>", "");
+
                 Files.writeString(pomFile.toPath(), content);
                 System.out.println("Replaced pom.xml");
             } else {
@@ -137,10 +140,10 @@ public class MavenArchetypeRunner {
             if (archetypeMetadataFile.exists()) {
                 String content = Files.readString(archetypeMetadataFile.toPath());
                 content = content.replaceAll(
-                        "(<fileSet encoding=\"UTF-8\">\\s*<directory>src/main/resources</directory>)",
+                        "<fileSet encoding=\"UTF-8\">\\s*<directory>src/main/resources</directory>",
                         "<fileSet filtered=\"true\" packaged=\"true\" encoding=\"UTF-8\"><directory>src/main/resources</directory>");
                 content = content.replaceAll(
-                        "(<fileSet encoding=\"UTF-8\">\\s*<directory>.vscode</directory>)",
+                        "<fileSet encoding=\"UTF-8\">\\s*<directory>.vscode</directory>",
                         "<fileSet filtered=\"true\" encoding=\"UTF-8\"><directory>.vscode</directory>");
                 Files.writeString(archetypeMetadataFile.toPath(), content);
                 System.out.println("Replaced archetype-metadata.xml");
