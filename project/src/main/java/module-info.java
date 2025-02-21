@@ -1,6 +1,4 @@
-module myapp {
-    requires static lombok;
-
+module com.sosuisha {
     requires javafx.controls;
     requires javafx.fxml;
 

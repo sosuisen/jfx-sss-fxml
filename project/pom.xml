@@ -3,9 +3,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.sosuisen</groupId>
-  <artifactId>jfx-sss-fxml-mvc</artifactId>
+  <artifactId>jfx-sss-fxml</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <description>Generated from jfx-sss-fxml-mvc archetype</description>
+  <description>Generated from jfx-sss-fxml archetype</description>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <javafx.plugin.version>0.0.8</javafx.plugin.version>
@@ -15,12 +15,6 @@
     <main.class>com.sosuisha.App</main.class>
   </properties>
   <dependencies>
-    <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <version>1.18.36</version>
-      <scope>provided</scope>
-    </dependency>
     <dependency>
       <groupId>org.openjfx</groupId>
       <artifactId>javafx-controls</artifactId>
@@ -38,15 +32,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.13.0</version>
-        <configuration>
-          <annotationProcessorPaths>
-            <path>
-              <groupId>org.projectlombok</groupId>
-              <artifactId>lombok</artifactId>
-              <version>1.18.36</version>
-            </path>
-          </annotationProcessorPaths>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.openjfx</groupId>
@@ -54,10 +39,9 @@
         <version>${javafx.plugin.version}</version>
         <configuration>
           <!-- run 'mvn javafx:jlink' to create launcher.
-            Exec ./target/myapp/bin/myapp to launch the app.
+            Exec ./target/your-project-name/bin/your-project-name to launch the app.
             -->
           <stripDebug>true</stripDebug>
-          <compress>2</compress>
           <noHeaderFiles>true</noHeaderFiles>
           <noManPages>true</noManPages>
           <mainClass>${main.class}</mainClass>
