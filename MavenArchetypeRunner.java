@@ -198,6 +198,10 @@ public class MavenArchetypeRunner {
                         "<maven.compiler.release>\\${javaVersion}</maven.compiler.release>");
                 content = content.replaceAll("<main\\.class>.+\\.App</main\\.class>",
                         "<main.class>\\${package}.App</main.class>");
+                content = content.replaceAll("(?s)\s+?<url>.+?</url>\r\n", "");
+                content = content.replaceAll("(?s)\s+?<licenses>.+?</licenses>\r\n", "");
+                content = content.replaceAll("(?s)\s+?<developers>.+?</developers>\r\n", "");
+                content = content.replaceAll("(?s)\s+?<scm />\r\n", "");
 
                 Files.writeString(pomFile.toPath(), content);
                 System.out.println("Replaced pom.xml");
