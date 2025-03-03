@@ -38,7 +38,6 @@ public class MavenArchetypeRunner {
                     <extensions>true</extensions>
                     <configuration>
                         <publishingServerId>central</publishingServerId>
-                        <tokenAuth>true</tokenAuth>
                     </configuration>
                 </plugin>
                 <plugin>
