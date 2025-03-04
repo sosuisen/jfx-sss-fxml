@@ -48,18 +48,104 @@
         <groupId>org.openjfx</groupId>
         <artifactId>javafx-maven-plugin</artifactId>
         <version>${javafx.plugin.version}</version>
+        <executions>
+          <execution>
+            <id>jlink</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jlink</goal>
+            </goals>
+          </execution>
+        </executions>
         <configuration>
-          <!-- run 'mvn javafx:jlink' to create launcher.
-            Exec ./target/your-project-name/bin/your-project-name to launch the app.
-            -->
           <stripDebug>true</stripDebug>
           <noHeaderFiles>true</noHeaderFiles>
           <noManPages>true</noManPages>
           <mainClass>${main.class}</mainClass>
-          <launcher>${project.artifactId}</launcher>
           <jlinkImageName>${project.artifactId}</jlinkImageName>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.4.2</version>
+        <configuration>
+          <outputDirectory>${project.basedir}/target/package</outputDirectory>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.panteleyev</groupId>
+        <artifactId>jpackage-maven-plugin</artifactId>
+        <version>1.6.6</version>
+        <configuration>
+          <name>${project.artifactId}</name>
+          <appVersion>1.0.0</appVersion>
+          <vendor>${project.groupId}</vendor>
+          <runtimeImage>${project.basedir}/target/image</runtimeImage>
+          <input>target/package</input>
+          <mainClass>${main.class}</mainClass>
+          <mainJar>${project.artifactId}-${project.version}.jar</mainJar>
+          <destination>target/jpackage</destination>
+          <javaOptions>
+            <option>-Dfile.encoding=UTF-8</option>
+          </javaOptions>
+          <type>${jpackage.type}</type>
+          <!-- Options for MSI -->
+          <!--
+          <winDirChooser>true</winDirChooser>
+          <winMenu>true</winMenu>
+          <winShortcut>true</winShortcut>
+          <winShortcutPrompt>true</winShortcutPrompt>
+          -->
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>jpackage</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
+  <profiles>
+    <profile>
+      <id>win</id>
+      <activation>
+        <os>
+          <family>windows</family>
+        </os>
+      </activation>
+      <properties>
+        <!-- APP_IMAGE or MSI-->
+        <!-- If you choose MSI, install WiX ver3 and set the path -->
+        <jpackage.type>APP_IMAGE</jpackage.type>
+      </properties>
+    </profile>
+    <profile>
+      <id>mac</id>
+      <activation>
+        <os>
+          <family>mac</family>
+        </os>
+      </activation>
+      <properties>
+        <!-- DMG or PKG -->
+        <jpackage.type>DMG</jpackage.type>
+      </properties>
+    </profile>
+    <profile>
+      <id>linux</id>
+      <activation>
+        <os>
+          <family>unix</family>
+        </os>
+      </activation>
+      <properties>
+        <!-- APP_IMAGE, RPM or DEB-->
+        <jpackage.type>APP_IMAGE</jpackage.type>
+      </properties>
+    </profile>
+  </profiles>
 </project>
