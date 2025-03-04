@@ -111,6 +111,18 @@
   </build>
   <profiles>
     <profile>
+      <id>unix</id>
+      <activation>
+        <os>
+          <family>unix</family>
+        </os>
+      </activation>
+      <properties>
+        <!-- APP_IMAGE, RPM or DEB-->
+        <jpackage.type>APP_IMAGE</jpackage.type>
+      </properties>
+    </profile>
+    <profile>
       <id>win</id>
       <activation>
         <os>
@@ -133,18 +145,6 @@
       <properties>
         <!-- DMG or PKG -->
         <jpackage.type>DMG</jpackage.type>
-      </properties>
-    </profile>
-    <profile>
-      <id>linux</id>
-      <activation>
-        <os>
-          <family>unix</family>
-        </os>
-      </activation>
-      <properties>
-        <!-- APP_IMAGE, RPM or DEB-->
-        <jpackage.type>APP_IMAGE</jpackage.type>
       </properties>
     </profile>
   </profiles>
