@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.sosuisen</groupId>
   <artifactId>jfx-sss-fxml</artifactId>
-  <version>1.0.3</version>
+  <version>1.0.4</version>
   <description>JavaFX Archetype for FXML project</description>
   <url>https://github.com/sosuisen/</url>
   <licenses>
