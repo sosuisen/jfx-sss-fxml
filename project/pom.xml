@@ -62,7 +62,7 @@
           <noHeaderFiles>true</noHeaderFiles>
           <noManPages>true</noManPages>
           <mainClass>${main.class}</mainClass>
-          <jlinkImageName>${project.artifactId}</jlinkImageName>
+          <jlinkImageName>image</jlinkImageName>
         </configuration>
       </plugin>
       <plugin>
