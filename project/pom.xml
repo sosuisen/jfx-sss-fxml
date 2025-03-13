@@ -79,7 +79,7 @@
         <artifactId>maven-jar-plugin</artifactId>
         <version>3.4.2</version>
         <configuration>
-          <outputDirectory>${project.basedir}/target/package</outputDirectory>
+          <outputDirectory>${project.build.directory}/app</outputDirectory>
           <archive>
             <manifest>
               <addClasspath>true</addClasspath>

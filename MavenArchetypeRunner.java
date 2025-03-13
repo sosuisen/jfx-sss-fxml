@@ -195,8 +195,8 @@ public class MavenArchetypeRunner {
                         "<javafx.version>\\${javaFxVersion}</javafx.version>");
                 content = content.replaceAll("<maven\\.compiler\\.release>.+</maven\\.compiler\\.release>",
                         "<maven.compiler.release>\\${javaVersion}</maven.compiler.release>");
-                content = content.replaceAll("<main\\.class>.+\\.App</main\\.class>",
-                        "<main.class>\\${package}.App</main.class>");
+                content = content.replaceAll("<main\\.class>.+\\.Launcher</main\\.class>",
+                        "<main.class>\\${package}.Launcher</main.class>");
                 content = content.replaceAll("(?s)\s+?<url>.+?</url>\r\n", "");
                 content = content.replaceAll("(?s)\s+?<licenses>.+?</licenses>\r\n", "");
                 content = content.replaceAll("(?s)\s+?<developers>.+?</developers>\r\n", "");
