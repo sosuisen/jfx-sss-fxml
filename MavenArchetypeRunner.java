@@ -255,6 +255,18 @@ public class MavenArchetypeRunner {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        // Copy archetype-post-generate.groovy to
+        // target/generated-sources/archetype/src/main/resources/archetype-resources/META-INF
+        Path groovySource = new File(System.getProperty("user.dir"), "archetype-post-generate.groovy").toPath();
+        Path groovyDestination = projectDir.toPath().resolve(
+                "target/generated-sources/archetype/src/main/resources/META-INF/archetype-post-generate.groovy");
+        try {
+            Files.copy(groovySource, groovyDestination);
+            System.out.println("Copied archetype-post-generate.groovy to " + groovyDestination);
+        } catch (IOException e) {
+            System.err.println("Failed to copy archetype-post-generate.groovy: " + e.getMessage());
+        }
     }
 
     static private void processResourceFiles(Path directory) throws IOException {
