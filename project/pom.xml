@@ -5,7 +5,7 @@
   <groupId>io.github.sosuisen</groupId>
   <artifactId>jfx-sss-fxml</artifactId>
   <version>1.1.1</version>
-  <description>JavaFX archetype for a non-modular FXML project</description>
+  <description>JavaFX archetype for a non-modular FXML project. This archetype is designed for Java beginners. To keep things simple, it does not incorporate the Java module system.</description>
   <url>https://github.com/sosuisen/</url>
   <licenses>
     <license/>
