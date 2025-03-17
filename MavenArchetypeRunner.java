@@ -68,36 +68,37 @@ public class MavenArchetypeRunner {
                   </execution>
                  </executions>
                 </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-gpg-plugin</artifactId>
-                 <version>1.6</version>
-                 <executions>
-                     <execution>
-                      <id>sign-artifacts</id>
-                   <phase>verify</phase>
-                   <goals>
-                    <goal>sign</goal>
-                   </goals>
-                  </execution>
-                 </executions>
-                </plugin>
+                %s
             </plugins>
                 """;
+    static final String GPG_PLUGIN = """
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            """;
 
     public static void main(String[] args) {
-        // カレントディレクトリの "project" フォルダを対象にする
         File projectDir = new File(System.getProperty("user.dir"), "project");
         if (!projectDir.exists() || !projectDir.isDirectory()) {
-            System.err.println("project フォルダが存在しません: " + projectDir.getAbsolutePath());
+            System.err.println("project directory does not exist: " + projectDir.getAbsolutePath());
             System.exit(1);
         }
 
-        // Maven コマンドと引数をリストに格納
         String os = System.getProperty("os.name").toLowerCase();
         boolean isWindows = os.contains("win");
 
-        // まず mvn clean を実行
+        // Run "mvn clean" first.
         List<String> cleanCommand = new ArrayList<>();
         cleanCommand.add(isWindows ? "mvn.cmd" : "mvn");
         cleanCommand.add("clean");
@@ -127,33 +128,34 @@ public class MavenArchetypeRunner {
             System.exit(1);
         }
 
-        // アーキタイプ生成コマンドを準備
+        // Prepare the command for archetype generation.
         List<String> command = new ArrayList<>();
         command.add(isWindows ? "mvn.cmd" : "mvn");
         command.add("archetype:create-from-project");
         command.add("-Darchetype.properties=../archetype.properties");
 
-        // ProcessBuilder を作成し、作業ディレクトリを project フォルダに設定
+        // Create the ProcessBuilder and set the working directory to the project
+        // folder.
         ProcessBuilder pb = new ProcessBuilder(command);
         pb.directory(projectDir);
-        pb.redirectErrorStream(true); // 標準出力と標準エラーを統合
+        pb.redirectErrorStream(true); // Merge standard output and standard error.
 
         try {
             Process process = pb.start();
-            // プロセスの出力を読み込む
+            // Read the output of the process.
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             while ((line = reader.readLine()) != null) {
                 System.out.println(line);
             }
 
-            // プロセス終了コードを待つ
+            // Wait for the process to finish.
             int exitCode = process.waitFor();
             System.out.println(command.toString() + " has been done. Exit code: " + exitCode);
 
-            // アーキタイププロジェクトの生成結果を修正
+            // Modify the result of archetype project generation.
             // project/target/generated-sources/archetype/pom.xml
-            // アーキタイプ名の末尾に -archetype と付くのを削除
+            // Remove "-archetype" from the end of the archetype name.
             File archetypePomFile = new File(projectDir,
                     "target/generated-sources/archetype/pom.xml");
             String artifactId = null;
@@ -176,13 +178,18 @@ public class MavenArchetypeRunner {
                                 + ".git</connection>\n<developerConnection>scm:git:ssh://github.com:" + GITHUB_ACCOUNT
                                 + "/" + artifactId + ".git</developerConnection>\n<url>https://github.com/"
                                 + GITHUB_ACCOUNT + "/" + artifactId + "/tree/main</url>\n</scm>");
-                content = content.replaceAll("</pluginManagement>", "</pluginManagement>\n" + PUBLISH_PLUGIN);
+                String gpgPlugin = "";
+                if (System.getProperty("gpg") == null || !System.getProperty("gpg").equals("false")) {
+                    gpgPlugin = GPG_PLUGIN;
+                }
+                String publishPluginContent = String.format(PUBLISH_PLUGIN, gpgPlugin);
+                content = content.replaceAll("</pluginManagement>", "</pluginManagement>\n" + publishPluginContent);
                 Files.writeString(archetypePomFile.toPath(), content);
                 System.out.println("Replaced archetype pom.xml");
             }
 
+            // Replace the content in
             // project/target/generated-sources/archetype/main/archetype-resources/pom.xml
-            // の内容を置換
             File pomFile = new File(projectDir,
                     "target/generated-sources/archetype/src/main/resources/archetype-resources/pom.xml");
             if (pomFile.exists()) {
@@ -208,17 +215,17 @@ public class MavenArchetypeRunner {
                 System.out.println("pom.xml not found: " + pomFile.getAbsolutePath());
             }
             /*
+             * Replace the content in all fxml files under
              * project/target/generated-sources/archetype/src/main/resources/archetype-
-             * resources/src/main/resources/以下にある
-             * すべてのfxmlファイルの内容を置換
+             * resources/src/main/resources/
              */
             Path fxmlStartDir = projectDir.toPath()
                     .resolve(
                             "target/generated-sources/archetype/src/main/resources/archetype-resources/src/main/resources");
             processResourceFiles(fxmlStartDir);
 
+            // Replace the content in
             // project\target\generated-sources\archetype\src\main\resources\META-INF\maven\archetype-metadata.xml
-            // の内容を置換
             File archetypeMetadataFile = new File(projectDir,
                     "target/generated-sources/archetype/src/main/resources/META-INF/maven/archetype-metadata.xml");
             if (archetypeMetadataFile.exists()) {
@@ -233,20 +240,20 @@ public class MavenArchetypeRunner {
                 System.out.println("Replaced archetype-metadata.xml");
             }
 
+            // There are still .fxml files in this location, so delete them recursively.
             // project\target\generated-sources\archetype\target\classes\archetype-resources\src\main\resources
-            // この場所にも.fxmlファイルが残っているので、再帰的に削除
             Path targetClassesDir = projectDir.toPath()
                     .resolve(
                             "target/generated-sources/archetype/target/classes/archetype-resources/src/main/resources");
             if (Files.exists(targetClassesDir)) {
                 try (Stream<Path> paths = Files.walk(targetClassesDir)) {
-                    paths.sorted((a, b) -> b.compareTo(a)) // 逆順にソート（子から親の順）
+                    paths.sorted((a, b) -> b.compareTo(a))
                             .forEach(path -> {
                                 try {
                                     Files.delete(path);
                                     System.out.println("Deleted: " + path);
                                 } catch (IOException e) {
-                                    System.err.println("ファイルの削除中にエラーが発生しました: " + path);
+                                    System.err.println("Failed to delete: " + path);
                                 }
                             });
                 }
@@ -280,31 +287,31 @@ public class MavenArchetypeRunner {
                             content = content.replaceAll("fx:controller=\"[^\"]+\\.([^\"]+)\"",
                                     "fx:controller=\"\\${package}.$1\"");
 
-                            // 同じ場所に書き戻す
+                            // Write back to the same location.
                             Files.writeString(path, content);
                             System.out.println("Replaced " + path.getFileName());
                         } catch (IOException e) {
-                            throw new RuntimeException("FXMLファイルの処理中にエラーが発生しました: " + path, e);
+                            throw new RuntimeException("Failed to process FXML file: " + path, e);
                         }
                     });
         }
 
-        // すべての置換が終わった後でファイルを移動
+        // After all replacements, move the files.
         try (Stream<Path> paths = Files.walk(directory)) {
             paths.filter(path -> !Files.isDirectory(path))
                     .forEach(path -> {
                         try {
-                            // 新しい保存先のパスを作成
+                            // Create the new destination path.
                             Path newPath = directory.resolve(path.getFileName());
-                            // 移動先と同じ名前の場合はスキップ
+                            // Skip if the new path is the same as the original path.
                             if (newPath.equals(path)) {
                                 return;
                             }
-                            // ファイルが既にある場合は削除
+                            // Delete the file if it already exists.
                             if (Files.exists(newPath)) {
                                 Files.delete(newPath);
                             }
-                            // ファイルを新しい場所に移動
+                            // Move the file to the new location.
                             Files.move(path, newPath);
                             System.out.println("Moved " + path.getFileName());
                         } catch (IOException e) {
@@ -313,7 +320,7 @@ public class MavenArchetypeRunner {
                     });
         }
 
-        // 空のディレクトリを削除
+        // Delete empty directories.
         try (Stream<Path> paths = Files.walk(directory, Integer.MAX_VALUE)) {
             paths.sorted((a, b) -> b.compareTo(a))
                     .filter(path -> {
@@ -328,7 +335,7 @@ public class MavenArchetypeRunner {
                             Files.delete(path);
                             System.out.println("Deleted empty directory: " + path);
                         } catch (IOException e) {
-                            System.err.println("空ディレクトリの削除中にエラーが発生しました: " + path);
+                            System.err.println("Failed to delete empty directory: " + path);
                         }
                     });
         }
