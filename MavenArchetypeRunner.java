@@ -315,7 +315,7 @@ public class MavenArchetypeRunner {
                             Files.move(path, newPath);
                             System.out.println("Moved " + path.getFileName());
                         } catch (IOException e) {
-                            throw new RuntimeException("ファイルの移動中にエラーが発生しました: " + path, e);
+                            throw new RuntimeException("Error occurred while moving the file: " + path, e);
                         }
                     });
         }
