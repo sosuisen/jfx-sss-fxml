@@ -1,7 +1,10 @@
 package com.sosuisha;
 
+import javafx.fxml.FXML;
+
 public class MainController {
-    public void initialize() {
+    @FXML
+    private void initialize() {
 
     }
 }
