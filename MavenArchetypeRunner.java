@@ -183,7 +183,7 @@ public class MavenArchetypeRunner {
                     gpgPlugin = GPG_PLUGIN;
                 }
                 String publishPluginContent = String.format(PUBLISH_PLUGIN, gpgPlugin);
-                content = content.replaceAll("</pluginManagement>", "</pluginManagement>\n" + publishPluginContent);
+                content = content.replaceAll("</extensions>", "</extensions>\n" + publishPluginContent);
                 Files.writeString(archetypePomFile.toPath(), content);
                 System.out.println("Replaced archetype pom.xml");
             }
