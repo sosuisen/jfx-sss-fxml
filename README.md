@@ -1,9 +1,9 @@
 # jfx-sss-fxml
 
-This Maven Archetype is a JavaFX archetype for a non-modular FXML project.
+This Maven Archetype is a JavaFX template for a non-modular FXML project.
 https://central.sonatype.com/artifact/io.github.sosuisen/jfx-sss-fxml
 
-This archetype is designed for Java beginners. To keep things simple, it does not incorporate the Java module system.
+Designed for Java beginners, this archetype simplifies the development process by excluding the Java module system.
 
 To use it, run `mvn archetype:generate` and search for **jfx-sss-fxml**.
 
