@@ -34,7 +34,7 @@ public class MavenArchetypeRunner {
                 <plugin>
                     <groupId>org.sonatype.central</groupId>
                     <artifactId>central-publishing-maven-plugin</artifactId>
-                    <version>0.7.0</version>
+                    <version>0.10.0</version>
                     <extensions>true</extensions>
                     <configuration>
                         <publishingServerId>central</publishingServerId>
@@ -42,7 +42,7 @@ public class MavenArchetypeRunner {
                 </plugin>
                 <plugin>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>3.3.0</version>
+                    <version>3.4.0</version>
                     <executions>
                         <execution>
                             <id>attach-sources</id>
@@ -53,20 +53,20 @@ public class MavenArchetypeRunner {
                 </plugin>
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                 <version>3.3.0</version>
-                 <configuration>
+                    <version>3.12.0</version>
+                    <configuration>
                         <additionalOptions>
-                         <!-- skip strict check java doc-->
+                        <!-- skip strict check java doc-->
                             <additionalOption>-Xdoclint:none</additionalOption>
                         </additionalOptions>
                     </configuration>
-                 <executions>
-                  <execution>
-                      <id>attach-javadocs</id>
-                      <phase>package</phase>
-                      <goals><goal>jar</goal></goals>
-                  </execution>
-                 </executions>
+                    <executions>
+                        <execution>
+                            <id>attach-javadocs</id>
+                            <phase>package</phase>
+                            <goals><goal>jar</goal></goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 %s
             </plugins>
@@ -75,7 +75,7 @@ public class MavenArchetypeRunner {
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.6</version>
+                <version>3.2.8</version>
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>
@@ -109,10 +109,11 @@ public class MavenArchetypeRunner {
 
         try {
             Process cleanProcess = cleanPb.start();
-            BufferedReader cleanReader = new BufferedReader(new InputStreamReader(cleanProcess.getInputStream()));
-            String line;
-            while ((line = cleanReader.readLine()) != null) {
-                System.out.println(line);
+            try (BufferedReader cleanReader = new BufferedReader(new InputStreamReader(cleanProcess.getInputStream()))) {
+                String line;
+                while ((line = cleanReader.readLine()) != null) {
+                    System.out.println(line);
+                }
             }
 
             int cleanExitCode = cleanProcess.waitFor();
@@ -143,10 +144,11 @@ public class MavenArchetypeRunner {
         try {
             Process process = pb.start();
             // Read the output of the process.
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println(line);
+                }
             }
 
             // Wait for the process to finish.
@@ -204,10 +206,10 @@ public class MavenArchetypeRunner {
                         "<maven.compiler.release>\\${javaVersion}</maven.compiler.release>");
                 content = content.replaceAll("<main\\.class>.+\\.Launcher</main\\.class>",
                         "<main.class>\\${package}.Launcher</main.class>");
-                content = content.replaceAll("(?s)\s+?<url>.+?</url>\r\n", "");
-                content = content.replaceAll("(?s)\s+?<licenses>.+?</licenses>\r\n", "");
-                content = content.replaceAll("(?s)\s+?<developers>.+?</developers>\r\n", "");
-                content = content.replaceAll("(?s)\s+?<scm />\r\n", "");
+                content = content.replaceAll("(?s)\\s+?<url>.+?</url>\r?\n", "");
+                content = content.replaceAll("(?s)\\s+?<licenses>.+?</licenses>\r?\n", "");
+                content = content.replaceAll("(?s)\\s+?<developers>.+?</developers>\r?\n", "");
+                content = content.replaceAll("(?s)\\s+?<scm />\r?\n", "");
 
                 Files.writeString(pomFile.toPath(), content);
                 System.out.println("Replaced pom.xml");
@@ -276,7 +278,7 @@ public class MavenArchetypeRunner {
         }
     }
 
-    static private void processResourceFiles(Path directory) throws IOException {
+    private static void processResourceFiles(Path directory) throws IOException {
         try (Stream<Path> paths = Files.walk(directory)) {
             paths.filter(path -> path.toString().endsWith(".fxml"))
                     .forEach(path -> {
@@ -325,7 +327,9 @@ public class MavenArchetypeRunner {
             paths.sorted((a, b) -> b.compareTo(a))
                     .filter(path -> {
                         try {
-                            return Files.isDirectory(path) && Files.list(path).count() == 0;
+                            try (Stream<Path> entries = Files.list(path)) {
+                                return Files.isDirectory(path) && entries.count() == 0;
+                            }
                         } catch (IOException e) {
                             return false;
                         }
