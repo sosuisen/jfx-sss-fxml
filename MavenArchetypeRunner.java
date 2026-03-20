@@ -109,7 +109,8 @@ public class MavenArchetypeRunner {
 
         try {
             Process cleanProcess = cleanPb.start();
-            try (BufferedReader cleanReader = new BufferedReader(new InputStreamReader(cleanProcess.getInputStream()))) {
+            try (BufferedReader cleanReader = new BufferedReader(
+                    new InputStreamReader(cleanProcess.getInputStream()))) {
                 String line;
                 while ((line = cleanReader.readLine()) != null) {
                     System.out.println(line);
@@ -196,10 +197,6 @@ public class MavenArchetypeRunner {
                     "target/generated-sources/archetype/src/main/resources/archetype-resources/pom.xml");
             if (pomFile.exists()) {
                 String content = Files.readString(pomFile.toPath());
-                if (artifactId != null) {
-                    content = content.replaceAll("<description>.+</description>",
-                            "<description>Generated from " + artifactId + " archetype</description>");
-                }
                 content = content.replaceAll("<javafx\\.version>.+</javafx\\.version>",
                         "<javafx.version>\\${javaFxVersion}</javafx.version>");
                 content = content.replaceAll("<maven\\.compiler\\.release>.+</maven\\.compiler\\.release>",
@@ -210,6 +207,11 @@ public class MavenArchetypeRunner {
                 content = content.replaceAll("(?s)\\s+?<licenses>.+?</licenses>\r?\n", "");
                 content = content.replaceAll("(?s)\\s+?<developers>.+?</developers>\r?\n", "");
                 content = content.replaceAll("(?s)\\s+?<scm />\r?\n", "");
+
+                if (artifactId != null) {
+                    content = content.replaceAll("<description>.+</description>",
+                            "<description>Generated from " + artifactId + " archetype</description>\r\n");
+                }
 
                 Files.writeString(pomFile.toPath(), content);
                 System.out.println("Replaced pom.xml");
