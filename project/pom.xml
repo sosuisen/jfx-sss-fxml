@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.sosuisen</groupId>
   <artifactId>jfx-sss-fxml</artifactId>
-  <version>1.2.0</version>
+  <version>1.2.1</version>
   <description>JavaFX 25 archetype for a non-modular FXML project. This archetype is designed for Java beginners. To keep things simple, it does not incorporate the Java module system.</description>
   <url>https://github.com/sosuisen/</url>
   <licenses>
